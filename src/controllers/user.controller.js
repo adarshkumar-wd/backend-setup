@@ -8,7 +8,7 @@ const registerUser =  asyncHandler(async(req , res) => {
 
     // Take detail from the frontend
     // Validation - not empty
-    // check if user alreafy exist or not using email or username
+    // check if user already exist or not using email or username
     // required file available or not - check for avatar
     // if avialable upload to cloudinary , avatar
     // create an object - create entry in database
@@ -39,6 +39,7 @@ const registerUser =  asyncHandler(async(req , res) => {
     // }
 
     const existedUserName = User.findOne({userName});
+    console.log("existed userName : ",existedUserName)
 
     if (existedUserName) {
         throw new ApiError( 409 , "userName already existed" );
@@ -68,10 +69,10 @@ const registerUser =  asyncHandler(async(req , res) => {
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
-        throw new ApiError(400 , "avatar must be required");
+        throw new ApiError(500 , "something went wrong while uploading the avtar");
     }
 
-    // asave user data in database
+    // save user data in database
 
      const user = await User.create({
         fullName,
@@ -89,11 +90,11 @@ const registerUser =  asyncHandler(async(req , res) => {
     // .select use to remove the given keys from the  pointed object or data
 
     if (!userData) {
-        throw new ApiError(500 , "server error data nor registered on database")
+        throw new ApiError(500 , "server error data not registered on database")
     }
 
     return res.status(201).json(
-        new ApiResponse(200 ,userData , "user Registered Successfully")
+        new ApiResponse(200 , userData , "user Registered Successfully")
     )
 
 })

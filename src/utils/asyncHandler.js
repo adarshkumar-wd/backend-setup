@@ -10,7 +10,7 @@ export {asyncHandler}
 
 
 // const asyncHandler = (function) => {
-//     async(res , req , next) => { }
+//     return async(res , req , next) => { }
 // }
 
 // const asyncHandler = (func) => async(res , req , next) => {
