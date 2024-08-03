@@ -351,6 +351,31 @@ const updateAccountDetail = asyncHandler(async (req ,res) => {
 
 })
 
+const updateUserAvatar = asyncHandler(async (req , res) => {
+    const avatarLocalPath = req.file?.path
+
+    if (!avatarLocalPath) {
+        throw new ApiError(400  , "Avatar is not available")
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+    if (!avatar) {
+        throw new ApiError(500  , "error while uploading the avatar")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set :{
+                avatar : avatar.url
+            }
+        },
+        {new : true}
+    ).select("-password")
+
+})
+
 
 export {
     registerUser,
@@ -359,5 +384,6 @@ export {
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
-    updateAccountDetail
+    updateAccountDetail,
+    updateUserAvatar
 } 
