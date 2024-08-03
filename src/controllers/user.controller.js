@@ -133,8 +133,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { email, userName, password } = req.body
 
-    if (!userName || !email) {
-        throw new ApiError(400, "email or userName must be required")
+    // if (!email) {
+    //     throw new ApiError(400, "email must be required")
+    // }
+    console.log("email " , email)
+    console.log("userName " , userName)
+
+    if (!email && !userName) {
+        throw new ApiError(401 , "email and username must be required")
     }
 
     if (!password) {
@@ -145,6 +151,8 @@ const loginUser = asyncHandler(async (req, res) => {
         $or: [{ userName }, { email }]
     })
 
+    console.log("user : " , user)
+
     if (!user) {
         throw new ApiError(404, "user does not exist")
     }
@@ -152,14 +160,17 @@ const loginUser = asyncHandler(async (req, res) => {
     // the methods you build to check the password in user model or generate token methods is available in user which is saved in mongodb 
 
     const isPasswordCorrect = await user.isPasswordCorrect(password)
-
+    console.log( "isPasswordCorrect : " ,isPasswordCorrect)
     if (!isPasswordCorrect) {
         throw new ApiError(401, "password incorrect")
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+    // console.log(accessToken)
+    // console.log(refreshToken)
 
-    const loggedInUser = await User.findById(user._id).select("-password , -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    console.log("loggedUser : " ,  loggedInUser)
 
     // to send cookies 
 
@@ -176,7 +187,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 {
-                    user: loggedInUser,
+                    user: user,
                     refreshToken,
                     accessToken
                 },
