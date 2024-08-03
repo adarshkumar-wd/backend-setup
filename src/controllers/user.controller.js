@@ -136,9 +136,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // if (!email) {
     //     throw new ApiError(400, "email must be required")
-    // }
-    console.log("email " , email)
-    console.log("userName " , userName)
+    // // }
+    // console.log("email " , email)
+    // console.log("userName " , userName)
 
     if (!email && !userName) {
         throw new ApiError(401 , "email and username must be required")
@@ -152,7 +152,7 @@ const loginUser = asyncHandler(async (req, res) => {
         $or: [{ userName }, { email }]
     })
 
-    console.log("user : " , user)
+    // console.log("user : " , user)
 
     if (!user) {
         throw new ApiError(404, "user does not exist")
@@ -188,7 +188,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 {
-                    user: user,
+                    user: loggedInUser,
                     refreshToken,
                     accessToken
                 },
@@ -283,4 +283,4 @@ export {
     loginUser,
     logoutUser,
     refreshAccessToken
-}
+} 
