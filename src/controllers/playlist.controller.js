@@ -41,10 +41,11 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const playlist = new Playlist(createdPlaylistDetail);
     await playlist.save();
 
-    user.playlists = user.playlists || [];
-    user.playlists.push(playlist);
-    await user.save({ validateBeforeSave: false });
-    console.log("user :  " , user.playlists[0])
+    // user.playlists = user.playlists || [];
+    // user.playlists.push(playlist);
+    // await user.save({ validateBeforeSave: false });
+    // console.log("playlists :   ",user.playlists)
+    // console.log("user :  " , user)
 
     return res
     .status(200)
@@ -63,6 +64,35 @@ const createPlaylist = asyncHandler(async (req, res) => {
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const {userId} = req.params
     //TODO: get user playlists
+    if (!userId) {
+        throw new ApiError(400 , "userId not found")
+    }
+
+    const user = await User.findById(userId).select("-password -refreshToken");
+    console.log("user : " ,user)
+
+    if (!user) {
+        throw new ApiError(400 , "user not found")
+    }
+
+    const playlists = await Playlist.find({owner : userId})
+    console.log(playlists);
+    
+
+    if (!playlists) {
+        throw new ApiError(400 , "playlist not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            playlists,
+            "playlists fetched sucessfully"
+        )
+    )
+
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
