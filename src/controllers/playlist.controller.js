@@ -42,8 +42,9 @@ const createPlaylist = asyncHandler(async (req, res) => {
     await playlist.save();
 
     user.playlists = user.playlists || [];
-    user.playlists.push(playlist._id);
+    user.playlists.push(playlist);
     await user.save({ validateBeforeSave: false });
+    console.log("user :  " , user.playlists[0])
 
     return res
     .status(200)

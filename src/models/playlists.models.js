@@ -2,7 +2,7 @@ import mongoose , {Schema} from "mongoose";
 
 const playlistSchema = new Schema({
 
-    name : {
+    playlistName : {
         type : String,
         required : true
     },
