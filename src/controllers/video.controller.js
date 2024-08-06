@@ -106,8 +106,48 @@ const getVideoById = asyncHandler(async (req, res) => {
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
     //TODO: update video details like title, description, thumbnail
+    const {title , description} = req.body
+    const { videoId } = req.params
+
+    if (!videoId) {
+        throw new ApiError(400 , "videoId not found")
+    }
+
+    const thumbnailLocalPath = req.file?.path
+
+    if (!thumbnailLocalPath) {
+        throw new ApiError("Thumbnail not found")
+    }
+
+    const uploadThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+    const videoData = await Video.findByIdAndUpdate(videoId , 
+        {
+            $set : {
+                title,
+                description,
+                thumbnail : uploadThumbnail.url
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    if (!videoData) {
+        throw new ApiError(401 , "video not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            videoData,
+            "video data updated sucessfully"
+        )
+    )
 
 })
 
