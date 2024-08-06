@@ -46,23 +46,33 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(500 , "something went wrong while uploading thumbnail on cloudinary")
     }
 
-    const video = Video.create({
+    const video = await Video.create({
         videoFile : uploadedVideo.url,
         thumbnail : uploadedThumbnail.url,
         title,
         description,
         duration : uploadedVideo.duration,
-        views,
-        isPublished,
+        views :0,
+        isPublished : true,
         owner : req?.user._id
     })
+
+    if (!video) {
+        throw new ApiError(500 , "something went wrong while save the video data in database")
+    }
+
+    const videoData = await Video.findById(video._id)
+
+    if (!videoData) {
+        throw new ApiError(410 , "video data not found")
+    }
 
     return res
     .status(200)
     .json(
         new ApiResponse(
             200, 
-            video,
+            videoData,
             "video uploaded successfully"
         )
     )

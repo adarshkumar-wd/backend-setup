@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       
       cb(null, file.originalname)  // this is not a good practice so after completing project ooptimise this file name
-      console.log("file - " , file)
+      // console.log("file - " , file)
     }
   })
 
