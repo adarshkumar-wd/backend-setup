@@ -41,12 +41,6 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const playlist = new Playlist(createdPlaylistDetail);
     await playlist.save();
 
-    // user.playlists = user.playlists || [];
-    // user.playlists.push(playlist);
-    // await user.save({ validateBeforeSave: false });
-    // console.log("playlists :   ",user.playlists)
-    // console.log("user :  " , user)
-
     return res
     .status(200)
     .json(
@@ -159,8 +153,39 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 
 const updatePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
-    const {name, description} = req.body
+    const {playlistName, description} = req.body
     //TODO: update playlist
+
+    if (!playlistId) {
+        throw new ApiError(400 , "Playlist id not found")
+    }
+
+    const playlist = await Playlist.findByIdAndUpdate(playlistId , 
+        {
+            $set : {
+                playlistName,
+                description
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    if (!playlist) {
+        throw new ApiError(401 , "playlist not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200, 
+            playlist,
+            "playlist update successfully"
+        )
+    )
+
 })
 
 export {
