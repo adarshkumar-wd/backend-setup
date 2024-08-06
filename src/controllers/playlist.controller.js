@@ -117,6 +117,34 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
+
+    if (!playlistId) {
+        throw new ApiError(400 , "playlist id not found")
+    }
+
+    if (!videoId) {
+        throw new ApiError(400 , "video id not found")
+    }
+
+    const playlist = await Playlist.findById(playlistId)
+
+    if (!playlist) {
+        throw new ApiError(401 , "playlist not found in database")
+    }
+
+    await playlist.videos.push(videoId)
+    await playlist.save({validateBeforeSave : true})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            playlist,
+            "video added sucessfully"
+        )
+    )
+
 })
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
