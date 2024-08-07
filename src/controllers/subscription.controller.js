@@ -32,14 +32,15 @@ const toggleSubscription = asyncHandler(async (req, res) => {
             channel: channelId,
             subscriber: req.user._id
         })
+        
         if (!newSubscription) {
-            new ApiError(500 , "something went wrong while save the subscription data")
+            new ApiError(500, "something went wrong while save the subscription data")
         }
 
         const subscriptionData = await Subscription.findById(newSubscription._id)
 
         if (!subscriptionData) {
-            throw new ApiError(401 , "Data not found")
+            throw new ApiError(401, "Data not found")
         }
 
         return res.status(200).json(new ApiResponse(200, subscriptionData, "Subscribed successfully"));
@@ -52,6 +53,40 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.params
+
+    if (!channelId) {
+        throw new ApiError(400, "Channel Id not found")
+    }
+
+    const subscribers = await Subscription.aggregate(
+        [
+            {
+                $match: {
+                    channel: new mongoose.Types.ObjectId(channelId)
+                }
+            },
+            {
+                $group: {
+                    _id: "$subscriber"
+                }
+            }
+        ]
+    )
+
+    if (!subscribers) {
+        throw new ApiError(300 , "subscribers not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            subscribers,
+            "subscribers fetched sucessfully"
+        )
+    )
+
 })
 
 // controller to return channel list to which user has subscribed
