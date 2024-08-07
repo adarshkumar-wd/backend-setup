@@ -67,7 +67,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         comment : commentId
     })
 
-    if (commentId) {
+    if (likedComment) {
 
         await Likes.deleteOne({
             comment : commentId
@@ -110,8 +110,54 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const {tweetId} = req.params
     //TODO: toggle like on tweet
-}
-)
+
+    if (!tweetId) {
+        throw new ApiError(400 , "tweet Id not found")
+    }
+
+    const likedTweet = await Likes.findOne({
+        tweet : tweetId
+    })
+
+    if (likedTweet) {
+
+        await Likes.deleteOne({
+            tweet : tweetId
+        })
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "tweet dislike successfully"
+            )
+        )
+      
+    } else {
+
+        const tweetLikeData = await Likes.create({
+            tweet : tweetId
+        })
+
+        if (!tweetLikeData) {
+            throw new ApiError(500 , "something went wrong while creating the tweet like data")
+        }
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                tweetLikeData,
+                "tweet liked successfully"
+            )
+        )
+        
+    }
+
+})
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
