@@ -16,8 +16,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     const checkSubscribedOrNot = await Subscription.findOne({
         channel: channelId,
-        subscriber: req.user?.id
+        subscriber: req.user?._id
     })
+    console.log(checkSubscribedOrNot)
 
     if (checkSubscribedOrNot) {
         await Subscription.deleteOne({
@@ -27,14 +28,21 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
         return res.status(200).json(new ApiResponse(200, null, "Unsubscribed successfully"));
     } else {
-        const newSubscription = new Subscription({
+        const newSubscription = await Subscription.create({
             channel: channelId,
             subscriber: req.user._id
-        });
+        })
+        if (!newSubscription) {
+            new ApiError(500 , "something went wrong while save the subscription data")
+        }
 
-        await newSubscription.save();
+        const subscriptionData = await Subscription.findById(newSubscription._id)
 
-        return res.status(200).json(new ApiResponse(200, newSubscription, "Subscribed successfully"));
+        if (!subscriptionData) {
+            throw new ApiError(401 , "Data not found")
+        }
+
+        return res.status(200).json(new ApiResponse(200, subscriptionData, "Subscribed successfully"));
     }
 
 
