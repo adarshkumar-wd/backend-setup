@@ -148,8 +148,44 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 })
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
-    const {playlistId, videoId} = req.params
     // TODO: remove video from playlist
+    const {playlistId, videoId} = req.params
+
+    if (!playlistId) {
+        throw new ApiError(400 , "playlist id not found")
+    }
+
+    if (!videoId) {
+        throw new ApiError(400 , "video id not found")
+    }
+
+    const playlist = await Playlist.findById(playlistId)
+
+    if (!playlist) {
+        throw new ApiError(401 , "playlist not found in database")
+    }
+
+    // console.log(typeof(videoId))
+    // console.log(isValidObjectId(playlist.videos[0]))
+
+    const updatedPlaylist = playlist.videos.filter((items) => items !== new mongoose.Types.ObjectId(videoId))
+    playlist.videos = updatedPlaylist
+    await playlist.save({validateBeforeSave : true})
+
+    // console.log( new mongoose.Types.ObjectId(items))
+    console.log( videoId)
+    console.log( updatedPlaylist)
+    console.log(  playlist.videos)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            playlist,
+            "video remove sucessfully "
+        )
+    )
 
 })
 

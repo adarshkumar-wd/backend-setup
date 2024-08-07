@@ -466,7 +466,7 @@ const getUserChannelProfile = asyncHandler(async (req , res) => {
 
                 isSubscribed : {
                     $cond : {
-                        if: {$in : [req.user?._id , $subscribers.subscriber]},
+                        if: {$in : [req.user?._id , "$subscribers.subscriber"]},
                         then : true,
                         else : false
                     }
@@ -487,8 +487,6 @@ const getUserChannelProfile = asyncHandler(async (req , res) => {
             }
         }
     ])
-
-    console.log("channel :  " , channel)
 
     if (!channel?.length) {
         throw new ApiError(404 , "channel does not exists")
@@ -543,12 +541,17 @@ const getWatchHistory = asyncHandler(async (req , res) => {
         }
     ])
 
+
+    if (!getWatchHistory) {
+        throw new ApiError(500 , "watch history not found")
+    }
+
     return res
     .status(200)
     .json(
         new ApiResponse(
             200,
-            user[0].getWatchHistory,
+            user[0].watchHistory,
             "watch history fetch successfully"
         )
     )
