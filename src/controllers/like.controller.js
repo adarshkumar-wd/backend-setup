@@ -69,7 +69,8 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     }
 
     const likedComment = await Likes.findOne({
-        comment: commentId
+        comment: commentId , 
+        likesBy: req.user?._id 
     })
 
     if (likedComment) {
@@ -123,7 +124,8 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     }
 
     const likedTweet = await Likes.findOne({
-        tweet: tweetId
+        tweet: tweetId,
+        likesBy: req.user?._id 
     })
 
     if (likedTweet) {
