@@ -18,7 +18,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         channel: channelId,
         subscriber: req.user?._id
     })
-    console.log(checkSubscribedOrNot)
+    // console.log(checkSubscribedOrNot)
 
     if (checkSubscribedOrNot) {
         await Subscription.deleteOne({
@@ -54,7 +54,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.params
 
-    if (!channelId) {
+    if (!channelId || ! isValidObjectId(channelId)) {
         throw new ApiError(400, "Channel Id not found")
     }
 
@@ -93,7 +93,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
 
-    if (!subscriberId) {
+    if (!subscriberId || !isValidObjectId(subscriberId)) {
         throw new ApiError(400, "Channel Id not found")
     }
 
