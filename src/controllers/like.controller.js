@@ -61,8 +61,10 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     const { commentId } = req.params
     //TODO: toggle like on comment
 
-    if (!commentId) {
-        throw new ApiError(400, "comment Id not found")
+    if (!commentId || !isValidObjectId(videoId)) {
+        return res.status(400).json(
+            new ApiError(400, "Invalid or missing video ID")
+        );
     }
 
     const likedComment = await Likes.findOne({
@@ -113,8 +115,10 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     const { tweetId } = req.params
     //TODO: toggle like on tweet
 
-    if (!tweetId) {
-        throw new ApiError(400, "tweet Id not found")
+    if (!tweetId || !isValidObjectId(videoId)) {
+        return res.status(400).json(
+            new ApiError(400, "Invalid or missing video ID")
+        );
     }
 
     const likedTweet = await Likes.findOne({
