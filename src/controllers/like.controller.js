@@ -14,7 +14,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         );
     }
 
-    const likedVideo = await Likes.findOne({ Video: videoId })
+    const likedVideo = await Likes.findOne({ Video: videoId, likesBy: req.user?._id })
 
     if (likedVideo) {
 
@@ -34,7 +34,8 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
     } else {
         const videoLikeData = await Likes.create({
-            Video: videoId
+            Video: videoId,
+            likesBy: req.user?._id
         })
 
         if (!videoLikeData) {
@@ -167,6 +168,11 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     const likedVideos = await Likes.aggregate([
+        {
+            $match: {
+                likesBy: req.user?._id
+            }
+        },
         {
             $lookup: {
                 from: "videos",
