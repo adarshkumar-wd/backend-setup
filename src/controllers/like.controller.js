@@ -8,8 +8,10 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: toggle like on video
 
-    if (!videoId) {
-        throw new ApiError(400, "video Id not found")
+    if (!videoId || !isValidObjectId(videoId)) {
+        return res.status(400).json(
+            new ApiError(400, "Invalid or missing video ID")
+        );
     }
 
     const likedVideo = await Likes.findOne({ Video: videoId })
@@ -160,34 +162,31 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 })
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-    //TODO: get all liked videos
-
-    const likedVideos = await Likes.aggregate(
-        [
-            {
-                $group : {
-                    _id : "$Video"
-                }
+    const likedVideos = await Likes.aggregate([
+        {
+            $lookup: {
+                from: "videos",
+                localField: "Video",
+                foreignField: "_id",
+                as: "result"
             }
-        ]
-    )
-    console.log("likedVideos :- " , likedVideos)
+        },
+        {
+            $unwind: "$result"
+        },
+        {
+            $project: {
+                result: 1
+            }
+        }
+    ]);
 
-    if (!likedVideos) {
-        throw new ApiError(400 , "videos not found")
+    if (likedVideos.length === 0) {
+        throw new ApiError(404, "No liked videos found");
     }
 
-    return res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200,
-            likedVideos,
-            "liked video fetched successfully"
-        )
-    )
-
-})
+    return res.status(200).json(new ApiResponse(200, likedVideos, "Liked videos fetched successfully"));
+});
 
 export {
     toggleCommentLike,
