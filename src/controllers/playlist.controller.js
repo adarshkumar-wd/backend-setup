@@ -132,6 +132,14 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(401 , "playlist not found in database")
     }
 
+    // const isVideoAvailble = false;
+
+    for(let i = 0 ; i < playlist.videos.length ; i++){
+        if (playlist.videos[i].equals(videoId)) {
+            throw new ApiError(401 , "video is already available in playlist")
+        }
+    }
+
     await playlist.videos.push(videoId)
     await playlist.save({validateBeforeSave : true})
 
