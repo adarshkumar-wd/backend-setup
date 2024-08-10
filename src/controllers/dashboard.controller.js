@@ -49,6 +49,25 @@ const getChannelStats = asyncHandler(async (req, res) => {
         throw new ApiError(500 , "Something went wrong while count the subscribers")
     }
 
+    const totalViews = await Video.aggregate(
+        [
+            {
+              $match: {
+                owner : new mongoose.Types.ObjectId(channelId)
+              }
+            },
+            {
+              $project: {
+                views : 1,
+                _id : 0,
+              }
+            },
+            
+          ]
+    )
+    let totalNumberOfViews = 0
+    totalViews.forEach((viewObj) => totalNumberOfViews = totalNumberOfViews + viewObj.views )
+    
     return res
     .status(200)
     .json(
