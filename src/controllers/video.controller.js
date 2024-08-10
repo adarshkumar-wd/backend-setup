@@ -93,6 +93,12 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(400 , "Video not found")
     }
 
+    // console.log(selectedVideo.views)
+    if (selectedVideo) {
+        selectedVideo.views = selectedVideo.views + 1
+        await selectedVideo.save({validateBeforeSave : true})
+    }
+
     return res
     .status(200)
     .json(
