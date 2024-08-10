@@ -13,6 +13,45 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
+    const {commentContent} = req.body
+    const {videoId} = req.params
+
+    if (!commentContent) {
+        throw new ApiError(400 , "comment content must be required")
+    }
+
+    if (!videoId || !mongoose.isValidObjectId(videoId)) {
+        throw new ApiError(400 , "Invalid video Id")
+    }
+
+    const createComment = await Comment.create(
+        {
+            content : commentContent,
+            video : videoId,
+            owner : req.user?._d
+        }
+    )
+
+    if (!createComment) {
+        throw new ApiError(500 , "Something went Wrong while save the comment data in database")
+    }
+
+    const CommentData = await Comment.findById(createComment._id)
+
+    if (!CommentData) {
+        throw new ApiError(401 , "Comment data not found in database")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            CommentData,
+            "Comment created successfully"
+        )
+    )
+
 })
 
 const updateComment = asyncHandler(async (req, res) => {
