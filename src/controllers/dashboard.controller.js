@@ -65,6 +65,11 @@ const getChannelStats = asyncHandler(async (req, res) => {
             
           ]
     )
+
+    if (!totalViews) {
+      throw new ApiError(500 , "Something went wrong while count the views")
+  }
+
     let totalNumberOfViews = 0
     totalViews.forEach((viewObj) => totalNumberOfViews = totalNumberOfViews + viewObj.views )
 
@@ -81,6 +86,10 @@ const getChannelStats = asyncHandler(async (req, res) => {
             
           ]
     )
+
+    if (!countVideo) {
+      throw new ApiError(500 , "Something went wrong while count the videos")
+  }
 
     let totalVideos = countVideo[0].count
     let totalSubscribers = countSubscriber[0].subscribers
