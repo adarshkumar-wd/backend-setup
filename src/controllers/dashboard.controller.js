@@ -15,7 +15,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
         throw new ApiError(401 , "Invalid channelId")
     }
     // 66b131d25c9702d0d648a596
-    const totalSubscribers = await User.aggregate(
+    const countSubscriber = await User.aggregate(
             [
                 {
                   $match: {
@@ -45,7 +45,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
             ] 
     )
 
-    if (!totalSubscribers) {
+    if (!countSubscriber) {
         throw new ApiError(500 , "Something went wrong while count the subscribers")
     }
 
@@ -67,13 +67,35 @@ const getChannelStats = asyncHandler(async (req, res) => {
     )
     let totalNumberOfViews = 0
     totalViews.forEach((viewObj) => totalNumberOfViews = totalNumberOfViews + viewObj.views )
-    
+
+    const countVideo = await Video.aggregate(
+        [
+            {
+              $match: {
+                owner : new mongoose.Types.ObjectId(channelId)
+              }
+            },
+            {
+              $count: 'count'
+            }
+            
+          ]
+    )
+
+    let totalVideos = countVideo[0].count
+    let totalSubscribers = countSubscriber[0].subscribers
+
+
     return res
     .status(200)
     .json(
         new ApiResponse(
             200,
-            totalSubscribers,
+            {
+                totalNumberOfSubscribers : totalSubscribers,
+                totalNumberOfViews,
+                totalNumberOfVideos : totalVideos
+            },
             "data fetched"
         )
     )
