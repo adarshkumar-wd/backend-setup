@@ -10,6 +10,84 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+
+    if (!userId || !isValidObjectId(userId)) {
+        throw new ApiError(400 , "Incalid user Id")
+    }
+    // 66b3b726ed054e32a15950a1
+    const videos = await User.aggregate(
+        [
+            {
+              $match: {
+                _id : new mongoose.Types.ObjectId(userId)
+              }
+            },
+            {
+              $lookup: {
+                from: "videos",
+                localField: "_id",
+                foreignField: "owner",
+                as: "videos"
+              }
+            },
+            {
+              $unwind: "$videos"
+            },
+            {
+              $project: {
+                videos : 1,
+                _id : 0
+              }
+            }
+          ]
+    )
+
+    if (videos.length === 0) {
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "User does not uploaded any videos"
+            )
+        )
+    }
+
+    let filteredVideos = videos.map(v => v.videos); // Extract the videos array
+
+    // Basic filtering using includes
+    if (query) {
+        filteredVideos = filteredVideos.filter(video => video.title.toLowerCase().includes(query) || video.title.includes(query));
+    }
+
+    // Basic sorting
+    if (sortBy && sortType) {
+        filteredVideos.sort((a, b) => {
+            if (sortType === 'asc') {
+                return a[sortBy] > b[sortBy] ? 1 : -1;
+            } else {
+                return a[sortBy] < b[sortBy] ? 1 : -1;
+            }
+        });
+    }
+
+    const paginate = (page , limit , videos) => {
+        const startingIndex = (page - 1) * limit
+        const endIndex = page * limit
+        return filteredVideos.slice(startingIndex , endIndex)
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            paginate(page , limit , videos),
+            "Video fetched successfully"
+        )
+    )
+
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
