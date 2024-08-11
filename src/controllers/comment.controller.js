@@ -149,6 +149,28 @@ const updateComment = asyncHandler(async (req, res) => {
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment
+    const {commentId} = req.params
+
+    if (!commentId || !mongoose.isValidObjectId(commentId)) {
+        throw new ApiError(400 , "Invalid comment Id")
+    }
+
+    const comment = await Comment.deleteOne({_id : commentId})
+
+    if (comment.deletedCount === 0) {
+        throw new ApiError(401 , "comment not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {},
+            "comment deleted"
+        )
+    )
+
 })
 
 export {
