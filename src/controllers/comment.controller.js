@@ -3,11 +3,71 @@ import {Comment} from "../models/comment.models.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
+import {Video} from "../models/video.models.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
     //TODO: get all comments for a video
     const {videoId} = req.params
     const {page = 1, limit = 10} = req.query
+
+    if (!videoId || !mongoose.isValidObjectId(videoId)) {
+        throw new ApiError(400 , "Invalid video Id")
+    }
+//66b2766da588e8934b4019f5
+    const comments = await Video.aggregate(
+        [
+            {
+              $match: {
+                _id : new mongoose.Types.ObjectId(videoId)
+              }
+            },
+            {
+              $lookup: {
+                from: "comments",
+                localField: "_id",
+                foreignField: "video",
+                as: "comment"
+              }
+            },
+            {
+              $unwind: "$comment"
+            },
+            {
+              $project: {
+                comment : 1,
+                _id : 0
+              }
+            }
+          ]
+    )
+
+    if (comments.length === 0) {
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Comments are not available in this video"
+            )
+        )
+    }
+
+    const paginate = (page , limit , comments) => {
+        const startingIndex = (page - 1) * limit
+        const lastIndex = page * limit
+        return comments.slice(startingIndex , lastIndex)
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            paginate(page , limit , comments),
+            "Video comments fetched successfully"
+        )
+    )
 
 })
 
