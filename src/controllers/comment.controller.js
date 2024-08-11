@@ -116,6 +116,35 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
+    const {commentId} = req.params
+
+    if (!commentId || !mongoose.isValidObjectId(commentId)) {
+        throw new ApiError(400 , "Invalid comment Id")
+    }
+
+    const comment = await Comment.findByIdAndUpdate(commentId , 
+        {
+            content : "this is my updated comment brooh!"
+        },
+        {
+            new : true
+        }
+    )
+
+    if (!comment) {
+        throw new ApiError(401 , "Comment not found")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            comment,
+            "Comment updated successfully"
+        )
+    )
+
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
