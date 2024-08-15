@@ -10,8 +10,8 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     const { channelId } = req.params
     // TODO: toggle subscription
 
-    if (!channelId) {
-        throw new ApiError(400, "channel Id not found")
+    if (!channelId || !isValidObjectId(channelId)) {
+        throw new ApiError(400, "Invalid channel Id")
     };
 
     const checkSubscribedOrNot = await Subscription.findOne({
@@ -55,7 +55,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.params
 
     if (!channelId || ! isValidObjectId(channelId)) {
-        throw new ApiError(400, "Channel Id not found")
+        throw new ApiError(400, "Invalid channel Id")
     }
 
     const subscribers = await Subscription.aggregate(
@@ -94,7 +94,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
 
     if (!subscriberId || !isValidObjectId(subscriberId)) {
-        throw new ApiError(400, "Channel Id not found")
+        throw new ApiError(400, "Invalid subscriber Id")
     }
 
     const subscribedChannel = await Subscription.aggregate(

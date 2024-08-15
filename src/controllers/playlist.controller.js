@@ -58,8 +58,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const {userId} = req.params
     //TODO: get user playlists
-    if (!userId) {
-        throw new ApiError(400 , "userId not found")
+    if (!userId || !isValidObjectId(userId)) {
+        throw new ApiError(400 , "Invalid Object Id")
     }
 
     const user = await User.findById(userId).select("-password -refreshToken");
@@ -93,8 +93,8 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     //TODO: get playlist by id
 
-    if (!playlistId) {
-        throw new ApiError(400 , "playlist id not found")
+    if (!playlistId || !isValidObjectId(playlistId)) {
+        throw new ApiError(400 , "Invalid playlist Id")
     }
 
     const playlist = await Playlist.findById(playlistId)
@@ -118,12 +118,12 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
 
-    if (!playlistId) {
-        throw new ApiError(400 , "playlist id not found")
+    if (!playlistId || !isValidObjectId(playlistId)) {
+        throw new ApiError(400 , "Invalid playlist Id")
     }
 
-    if (!videoId) {
-        throw new ApiError(400 , "video id not found")
+    if (!videoId || !isValidObjectId(videoId)) {
+        throw new ApiError(400 , "Invalide video id")
     }
 
     const playlist = await Playlist.findById(playlistId)
@@ -197,8 +197,8 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     // TODO: delete playlist
 
-    if (!playlistId) {
-        throw new ApiError(400 , "playlistId not found")
+    if (!playlistId || !isValidObjectId(playlistId)) {
+        throw new ApiError(400 , "Invalid playlist Id")
     }
 
     const deletePlaylist = await Playlist.deleteOne({_id : playlistId})
@@ -224,7 +224,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     const {playlistName, description} = req.body
     //TODO: update playlist
 
-    if (!playlistId) {
+    if (!playlistId || !isValidObjectId(playlistId)) {
         throw new ApiError(400 , "Playlist id not found")
     }
 

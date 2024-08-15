@@ -161,7 +161,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
 
-    if (!videoId) {
+    if (!videoId || !isValidObjectId()) {
         throw new ApiError(400 , "videoId not found")
     }
 
@@ -194,7 +194,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     const {title , description} = req.body
     const { videoId } = req.params
 
-    if (!videoId) {
+    if (!videoId || !isValidObjectId(videoId)) {
         throw new ApiError(400 , "videoId not found")
     }
 
@@ -239,8 +239,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
 
-    if (!videoId) {
-        throw new ApiError(400 , "videoId not found")
+    if (!videoId || !isValidObjectId(videoId)) {
+        throw new ApiError(400 , " Invalid video Id ")
     }
 
     const deleteVideo = await Video.deleteOne({_id : videoId})
@@ -264,8 +264,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 
-    if (!videoId) {
-        throw new ApiError(400 , "videoId not found")
+    if (!videoId || !isValidObjectId(videoId)) {
+        throw new ApiError(400 , "Invalid video Id")
     }
 
     const video = await Video.findByIdAndUpdate(videoId)
